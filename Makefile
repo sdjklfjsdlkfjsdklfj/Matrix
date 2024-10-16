@@ -1,2 +1,10 @@
-matrix: main.cpp
-	    clang++ -o bin main.cpp
+CXX = clang++
+TARGET = bin
+SRCS = main.cpp matrix.cpp
+
+$(TARGET): $(SRCS) 
+	$(CXX) -o $@ $^
+
+ clean:
+	rm -f $(OBJS) $(TARGET)
+
