@@ -1,9 +1,12 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#include <cstddef>
+#include <iostream>
 
-int** createMatrix(size_t, size_t);
-void deleteMatrix(int**, size_t);
+int** createMatrix(const size_t, const size_t);
+void deleteMatrix(int**, const size_t);
+
+int** inputMatrix(std::istream&, const size_t, const size_t);
+void outputMatrix(std::ostream&, const int* const*, const size_t, const size_t);
 
 #endif
