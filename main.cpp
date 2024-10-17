@@ -1,6 +1,7 @@
 #include "matrix.h"
 
-int main() {
+int main()
+{
   size_t rows = 0;
   size_t columns = 0;
 

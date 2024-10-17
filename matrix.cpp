@@ -1,6 +1,7 @@
 #include "matrix.h"
 
-int** createMatrix(const size_t rows, const size_t columns) {
+int** createMatrix(const size_t rows, const size_t columns)
+{
   int** matrix = new int*[rows];
   size_t createdRows = 0;
   try {
@@ -14,7 +15,8 @@ int** createMatrix(const size_t rows, const size_t columns) {
   return matrix;
 }
 
-void deleteMatrix(int* const* matrix, const size_t rows) {
+void deleteMatrix(int* const* matrix, const size_t rows)
+{
   for (size_t i = 0; i < rows; ++i) {
     delete[] matrix[i];
   }
@@ -22,23 +24,27 @@ void deleteMatrix(int* const* matrix, const size_t rows) {
 }
 
 void inputMatrix(std::istream& is,
-                 int* const* matrix,
-                 const size_t rows,
-                 const size_t columns) {
+    int* const* matrix,
+    const size_t rows,
+    const size_t columns)
+{
   for (size_t i = 0; i < rows; ++i) {
-    for (size_t j = 0; j < columns; ++j)
+    for (size_t j = 0; j < columns; ++j) {
       is >> matrix[i][j];
+    }
   }
 }
 
 void outputMatrix(std::ostream& os,
-                  const int* const* matrix,
-                  const size_t rows,
-                  const size_t columns) {
+    const int* const* matrix,
+    const size_t rows,
+    const size_t columns)
+{
   for (size_t i = 0; i < rows; ++i) {
     os << matrix[i][0];
-    for (size_t j = 1; j < columns; ++j)
+    for (size_t j = 1; j < columns; ++j) {
       os << ' ' << matrix[i][j];
+    }
     os << '\n';
   }
 }

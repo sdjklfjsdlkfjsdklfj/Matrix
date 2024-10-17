@@ -6,5 +6,5 @@ $(TARGET): $(SRCS)
 	$(CXX) -o $@ $^
 
  clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(TARGET)
 
