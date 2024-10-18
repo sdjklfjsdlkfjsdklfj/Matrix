@@ -1,10 +1,14 @@
 CXX = clang++
-TARGET = bin
+CFLAGS = -O2 -Wall -std=c++14
 SRCS = main.cpp matrix.cpp
+TARGET = bin
 
 $(TARGET): $(SRCS) 
-	$(CXX) -o $@ $^
+	$(CXX) $(CFLAGS) -o $@ $^
 
- clean:
+clean:
 	rm -f $(TARGET)
+
+run: $(TARGET)
+	./$(TARGET)
 
