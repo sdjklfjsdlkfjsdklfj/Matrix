@@ -5,7 +5,7 @@ This is a study project that demostrates a simple C++ programm for creating, inp
 ### Build Instructions
 
 ```bash
-   git clone https://github.com/sdjklfjsdlkfjsdklfj/Matrix.git
-   cd matrix
-   make run
+git clone https://github.com/sdjklfjsdlkfjsdklfj/Matrix.git
+cd Matrix
+make run
 ```
