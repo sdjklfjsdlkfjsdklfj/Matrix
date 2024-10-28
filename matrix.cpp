@@ -1,5 +1,4 @@
 #include "matrix.h"
-#include <charconv>
 #include <stdexcept>
 #include <utility>
 
@@ -9,10 +8,7 @@ Matrix::Matrix(const Matrix& other) :
 {
   for (size_type i = 0; i < size_; ++i) {
     data_[i] = other.data_[i];
-  }
-}
-
-Matrix::Matrix(Matrix&& other) noexcept :
+  } } Matrix::Matrix(Matrix&& other) noexcept :
   rows_(other.rows_), columns_(other.columns_), size_(other.size_),
   data_(other.data_)
 {
@@ -69,22 +65,28 @@ Matrix& Matrix::operator=(Matrix&& other) noexcept
 
 Matrix::value_type* Matrix::operator[](size_type index)
 {
-  return data_ + index;
+  return data_ + index * columns_;
 }
 
 const Matrix::value_type* Matrix::operator[](size_type index) const
 {
-  return data_ + index;
+  return data_ + index * columns_;
 }
 
 Matrix::reference Matrix::at(size_type row, size_type column)
 {
-  return *(data_ + row + column);
+  if (row >= rows_ || column >= columns_) {
+    throw std::out_of_range("Row or column out of range");
+  }
+  return *(data_ + row*columns_ + column);
 }
 
 Matrix::const_reference Matrix::at(size_type row, size_type column) const
 {
-  return *(data_ + row + column);
+  if (row >= rows_ || column >= columns_) {
+    throw std::out_of_range("Row or column out of range");
+  }
+  return *(data_ + row*columns_ + column);
 }
 
 Matrix::size_type Matrix::getRows() const noexcept
@@ -181,7 +183,7 @@ void Matrix::fill(value_type value)
   if (data_ == nullptr) {
     throw std::logic_error("Empty matrix");
   }
-  for (size_type i = 1; i < size_; ++i) {
+  for (size_type i = 0; i < size_; ++i) {
     data_[i] = value;
   }
 }
@@ -189,6 +191,7 @@ void Matrix::fill(value_type value)
 void Matrix::clear() noexcept
 {
   delete[] data_;
+  data_ = nullptr;
   rows_ = 0;
   columns_ = 0;
   size_ = 0;
