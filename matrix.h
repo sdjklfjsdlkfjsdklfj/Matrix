@@ -41,10 +41,15 @@ public:
   void fill(value_type);
   void clear() noexcept;
 
+  void swap(Matrix&);
+
 private:
-  size_type _rows;
-  size_type _columns;
-  value_type* _data;
+  size_type rows_;
+  size_type columns_;
+  size_type size_;
+  value_type* data_;
+
+  void checkSize(size_type, size_type) const;
 };
 
 #endif
