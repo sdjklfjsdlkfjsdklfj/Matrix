@@ -26,13 +26,8 @@ public:
   const_reference at(size_type, size_type) const;
   reference at(size_type, size_type);
 
-  size_type getRows() const noexcept;
-  size_type getColumns() const noexcept;
-
-  value_type getMinimum() const;
-  value_type getMaximum() const;
-  value_type getSum() const;
-  value_type getAverage() const;
+  size_type rows() const noexcept;
+  size_type columns() const noexcept;
 
   void input(std::istream&);
   void output(std::ostream&) const;
@@ -48,8 +43,13 @@ private:
   size_type columns_;
   size_type size_;
   value_type* data_;
+  bool is_initialized_;
 
-  void checkSize(size_type, size_type) const;
+  void reset();
+
+  void checkBounds(size_type, size_type) const;
+  void checkIsInitialized() const;
+  void checkIsEmpty() const;
 };
 
 #endif
