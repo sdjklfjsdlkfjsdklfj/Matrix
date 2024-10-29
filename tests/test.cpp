@@ -99,7 +99,6 @@ void testResize()
 
   assert(m.at(0, 0) == 3);
   assert(m.at(1, 1) == 3);
-
   assert(m.at(2, 2) == 0);
 }
 
@@ -110,7 +109,7 @@ int main()
   testElementAccess();
   testModifications();
   testInputOutput();
-  // testResize();
+  testResize();
   std::cout << "All tests passed!\n";
   return 0;
 }

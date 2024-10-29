@@ -1,34 +1,38 @@
 #include "matrix.h"
+#include <cmath>
 #include <stdexcept>
-#include <utility>
 
 Matrix::Matrix(const Matrix& other) :
   rows_(other.rows_), columns_(other.columns_), size_(other.size_),
-  data_(new value_type[other.size_])
+  data_(other.size_ ? new int[other.size_] : nullptr),
+  is_initialized_(other.is_initialized_)
 {
-  for (size_type i = 0; i < size_; ++i) {
-    data_[i] = other.data_[i];
-  } } Matrix::Matrix(Matrix&& other) noexcept :
+  if (is_initialized_) {
+    for (size_t i = 0; i < size_; ++i) {
+      data_[i] = other.data_[i];
+    }
+  }
+}
+
+Matrix::Matrix(Matrix&& other) noexcept :
   rows_(other.rows_), columns_(other.columns_), size_(other.size_),
-  data_(other.data_)
+  data_(other.data_), is_initialized_(other.is_initialized_)
 {
-  other.rows_ = 0;
-  other.columns_ = 0;
-  other.size_ = 0;
-  other.data_ = nullptr;
+  other.reset();
 }
 
-Matrix::Matrix(size_type rows, size_type columns) :
-  rows_(rows), columns_(columns), size_(rows * columns), data_()
+Matrix::Matrix(size_t rows, size_t columns) :
+  rows_(rows), columns_(columns), size_(rows * columns), data_(nullptr),
+  is_initialized_(false)
 {
-  checkSize(rows_, columns_);
-  data_ = new value_type[size_];
+  checkSizes(rows, columns);
+  data_ = new int[size_];
 }
 
-Matrix::Matrix(size_type rows, size_type columns, value_type value) :
-  Matrix(rows, columns)
+Matrix::Matrix(size_t rows, size_t columns, int value) : Matrix(rows, columns)
 {
-  for (size_type i = 0; i < size_; ++i) {
+  is_initialized_ = true;
+  for (size_t i = 0; i < size_; ++i) {
     data_[i] = value;
   }
 }
@@ -40,150 +44,104 @@ Matrix::~Matrix() noexcept
 
 Matrix& Matrix::operator=(const Matrix& other)
 {
-  if (this == &other) {
-    return *this;
-  }
-  delete[] data_;
-  rows_ = other.rows_;
-  columns_ = other.columns_;
-  size_ = other.size_;
-  data_ = new value_type[size_];
-  for (size_type i = 0; i < size_; ++i) {
-    data_[i] = other.data_[i];
+  if (this != &other) {
+    Matrix tmp(other);
+    swap(tmp);
   }
   return *this;
 }
 
 Matrix& Matrix::operator=(Matrix&& other) noexcept
 {
-  if (this == &other) {
-    return *this;
+  if (this != &other) {
+    swap(other);
   }
-  swap(other);
   return *this;
 }
 
-Matrix::value_type* Matrix::operator[](size_type index)
+int* Matrix::operator[](size_t index)
 {
   return data_ + index * columns_;
 }
 
-const Matrix::value_type* Matrix::operator[](size_type index) const
+const int* Matrix::operator[](size_t index) const
 {
   return data_ + index * columns_;
 }
 
-Matrix::reference Matrix::at(size_type row, size_type column)
+int& Matrix::at(size_t row, size_t column)
 {
-  if (row >= rows_ || column >= columns_) {
-    throw std::out_of_range("Row or column out of range");
-  }
-  return *(data_ + row*columns_ + column);
+  checkBounds(row, column);
+  checkIsInitialized();
+  return *(data_ + row * columns_ + column);
 }
 
-Matrix::const_reference Matrix::at(size_type row, size_type column) const
+const int& Matrix::at(size_t row, size_t column) const
 {
-  if (row >= rows_ || column >= columns_) {
-    throw std::out_of_range("Row or column out of range");
-  }
-  return *(data_ + row*columns_ + column);
+  checkBounds(row, column);
+  checkIsInitialized();
+  return *(data_ + row * columns_ + column);
 }
 
-Matrix::size_type Matrix::getRows() const noexcept
+size_t Matrix::rows() const noexcept
 {
   return rows_;
 }
 
-Matrix::size_type Matrix::getColumns() const noexcept
+size_t Matrix::columns() const noexcept
 {
   return columns_;
 }
 
-Matrix::value_type Matrix::getMinimum() const
-{
-  if (data_ == nullptr) {
-    throw std::logic_error("Empty matrix");
-  }
-  value_type minimum = *data_;
-  for (size_type i = 1; i < size_; ++i) {
-    if (data_[i] < minimum) {
-      minimum = data_[i];
-    }
-  }
-  return minimum;
-}
-
-Matrix::value_type Matrix::getMaximum() const
-{
-  if (data_ == nullptr) {
-    throw std::logic_error("Empty matrix");
-  }
-  value_type maximum = *data_;
-  for (size_type i = 1; i < size_; ++i) {
-    if (data_[i] > maximum) {
-      maximum = data_[i];
-    }
-  }
-  return maximum;
-}
-
-Matrix::value_type Matrix::getSum() const
-{
-  if (data_ == nullptr) {
-    throw std::logic_error("Empty matrix");
-  }
-  value_type sum = *data_;
-  for (size_type i = 1; i < size_; ++i) {
-    sum += data_[i];
-  }
-  return sum;
-}
-
-Matrix::value_type Matrix::getAverage() const
-{
-  value_type sum = getSum();
-  return sum / size_;
-}
-
 void Matrix::input(std::istream& is)
 {
-  if (data_ == nullptr) {
-    throw std::logic_error("Empty matrix");
-  }
-  for (size_type i = 0; i < size_; ++i) {
+  checkIsEmpty();
+  for (size_t i = 0; i < size_; ++i) {
     is >> data_[i];
   }
+  is_initialized_ = !is.bad();
 }
 
 void Matrix::output(std::ostream& os) const
 {
-  if (data_ == nullptr) {
-    throw std::logic_error("Empty matrix");
-  }
-  for (size_type i = 0; i < size_; i += columns_) {
+  checkIsInitialized();
+  for (size_t i = 0; i < size_; i += columns_) {
     os << data_[i];
-    for (size_type j = 1; j < columns_; ++j) {
+    for (size_t j = 1; j < columns_; ++j) {
       os << ' ' << data_[i + j];
     }
     os << '\n';
   }
 }
 
-// void Matrix::resize(size_type rows, size_type columns)
-//{
-// if (rows <= rows_ || columns <= columns_) {
-// const char* message = "New rows and columns must be greater than existing";
-// throw std::invalid_argument(message);
-//}
-// value_type* tmp = new value_type[rows * columns];
-//}
-
-void Matrix::fill(value_type value)
+void Matrix::resize(size_t rows, size_t columns)
 {
-  if (data_ == nullptr) {
-    throw std::logic_error("Empty matrix");
+  checkSizes(rows, columns);
+  if (rows == rows_ && columns == columns_) {
+    return;
   }
-  for (size_type i = 0; i < size_; ++i) {
+  Matrix tmp(rows, columns);
+
+  if (!is_initialized_) {
+    swap(tmp);
+    return;
+  }
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < columns; ++j) {
+      bool isValid = i < rows_ && j < columns_;
+      size_t indexNew = i * columns + j;
+      size_t indexOld = i * columns_ + j;
+      tmp.data_[indexNew] = isValid ? data_[indexOld] : int();
+    }
+  }
+  tmp.is_initialized_ = true;
+  swap(tmp);
+}
+
+void Matrix::fill(int value)
+{
+  checkIsEmpty();
+  for (size_t i = 0; i < size_; ++i) {
     data_[i] = value;
   }
 }
@@ -191,10 +149,7 @@ void Matrix::fill(value_type value)
 void Matrix::clear() noexcept
 {
   delete[] data_;
-  data_ = nullptr;
-  rows_ = 0;
-  columns_ = 0;
-  size_ = 0;
+  reset();
 }
 
 void Matrix::swap(Matrix& other)
@@ -203,11 +158,42 @@ void Matrix::swap(Matrix& other)
   std::swap(columns_, other.columns_);
   std::swap(size_, other.size_);
   std::swap(data_, other.data_);
+  std::swap(is_initialized_, other.is_initialized_);
 }
 
-void Matrix::checkSize(size_type rows, size_type columns) const
+void Matrix::reset()
+{
+  data_ = nullptr;
+  rows_ = 0;
+  columns_ = 0;
+  size_ = 0;
+  is_initialized_ = false;
+}
+
+void Matrix::checkBounds(size_t row, size_t column) const
+{
+  if (row >= rows_ || column >= columns_) {
+    throw std::out_of_range("Row or column out of range");
+  }
+}
+
+void Matrix::checkSizes(size_t rows, size_t columns) const
 {
   if (rows <= 0 || columns <= 0) {
     throw std::logic_error("Rows/columns must be greater than zero");
+  }
+}
+
+void Matrix::checkIsInitialized() const
+{
+  if (!is_initialized_) {
+    throw std::logic_error("Not initialized matrix");
+  }
+}
+
+void Matrix::checkIsEmpty() const
+{
+  if (data_ == nullptr) {
+    throw std::logic_error("Empty matrix");
   }
 }

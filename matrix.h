@@ -6,50 +6,46 @@
 class Matrix
 {
 public:
-  using size_type = std::size_t;
-  using value_type = int;
-  using reference = value_type&;
-  using const_reference = const value_type&;
-
   Matrix(const Matrix&);
   Matrix(Matrix&&) noexcept;
-  explicit Matrix(size_type, size_type);
-  explicit Matrix(size_type, size_type, value_type);
+  explicit Matrix(size_t, size_t);
+  explicit Matrix(size_t, size_t, int);
   ~Matrix() noexcept;
 
   Matrix& operator=(const Matrix&);
   Matrix& operator=(Matrix&& other) noexcept;
 
-  value_type* operator[](size_type);
-  const value_type* operator[](size_type) const;
+  int* operator[](size_t);
+  const int* operator[](size_t) const;
 
-  const_reference at(size_type, size_type) const;
-  reference at(size_type, size_type);
+  const int& at(size_t, size_t) const;
+  int& at(size_t, size_t);
 
-  size_type getRows() const noexcept;
-  size_type getColumns() const noexcept;
-
-  value_type getMinimum() const;
-  value_type getMaximum() const;
-  value_type getSum() const;
-  value_type getAverage() const;
+  size_t rows() const noexcept;
+  size_t columns() const noexcept;
 
   void input(std::istream&);
   void output(std::ostream&) const;
 
-  void resize(size_type, size_type);
-  void fill(value_type);
+  void resize(size_t, size_t);
+  void fill(int);
   void clear() noexcept;
 
   void swap(Matrix&);
 
 private:
-  size_type rows_;
-  size_type columns_;
-  size_type size_;
-  value_type* data_;
+  size_t rows_;
+  size_t columns_;
+  size_t size_;
+  int* data_;
+  bool is_initialized_;
 
-  void checkSize(size_type, size_type) const;
+  void reset();
+
+  void checkBounds(size_t, size_t) const;
+  void checkSizes(size_t, size_t) const;
+  void checkIsInitialized() const;
+  void checkIsEmpty() const;
 };
 
 #endif
