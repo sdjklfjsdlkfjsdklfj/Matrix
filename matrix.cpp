@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include <cmath>
 #include <stdexcept>
 
 Matrix::Matrix(const Matrix& other) :
@@ -24,9 +25,7 @@ Matrix::Matrix(size_type rows, size_type columns) :
   rows_(rows), columns_(columns), size_(rows * columns), data_(nullptr),
   is_initialized_(false)
 {
-  if (rows <= 0 || columns <= 0) {
-    throw std::logic_error("Rows/columns must be greater than zero");
-  }
+  checkSizes(rows, columns);
   data_ = new value_type[size_];
 }
 
@@ -118,23 +117,26 @@ void Matrix::output(std::ostream& os) const
 
 void Matrix::resize(size_type rows, size_type columns)
 {
-  if (rows <= rows_ || columns <= columns_) {
-    const char* message = "New rows and columns must be greater than existing";
-    throw std::invalid_argument(message);
+  checkSizes(rows, columns);
+  if (rows == rows_ && columns == columns_) {
+    return;
   }
-  value_type* tmp = new value_type[rows * columns];
-  if (is_initialized_) {
-    for (size_type i = 0; i < size_; i += columns_) {
-      for (size_type j = 0; j < columns_; ++j) {
-        tmp[i + j] = data_[i + j];
-      }
+  Matrix tmp(rows, columns);
+
+  if (!is_initialized_) {
+    swap(tmp);
+    return;
+  }
+  for (size_type i = 0; i < rows; ++i) {
+    for (size_type j = 0; j < columns; ++j) {
+      bool isValid = i < rows_ && j < columns_;
+      size_type indexNew = i * columns + j;
+      size_type indexOld = i * columns_ + j;
+      tmp.data_[indexNew] = isValid ? data_[indexOld] : value_type();
     }
   }
-  clear();
-  data_ = tmp;
-  rows_ = rows;
-  columns_ = columns;
-  size_ = rows * columns;
+  tmp.is_initialized_ = true;
+  swap(tmp);
 }
 
 void Matrix::fill(value_type value)
@@ -173,6 +175,13 @@ void Matrix::checkBounds(size_type row, size_type column) const
 {
   if (row >= rows_ || column >= columns_) {
     throw std::out_of_range("Row or column out of range");
+  }
+}
+
+void Matrix::checkSizes(size_type rows, size_type columns) const
+{
+  if (rows <= 0 || columns <= 0) {
+    throw std::logic_error("Rows/columns must be greater than zero");
   }
 }
 

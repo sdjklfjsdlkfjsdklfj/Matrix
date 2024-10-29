@@ -48,6 +48,7 @@ private:
   void reset();
 
   void checkBounds(size_type, size_type) const;
+  void checkSizes(size_type, size_type) const;
   void checkIsInitialized() const;
   void checkIsEmpty() const;
 };
