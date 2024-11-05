@@ -2,6 +2,7 @@
 #define MATRIX_H
 
 #include <iostream>
+#include <memory>
 
 class Matrix
 {
@@ -9,7 +10,7 @@ public:
   Matrix(const Matrix&);
   Matrix(Matrix&&) noexcept;
   explicit Matrix(size_t, size_t, int value = int());
-  ~Matrix() noexcept;
+  ~Matrix() = default;
 
   Matrix& operator=(const Matrix&);
   Matrix& operator=(Matrix&& other) noexcept;
@@ -34,7 +35,7 @@ private:
   size_t rows_;
   size_t columns_;
   size_t size_;
-  int* data_;
+  std::unique_ptr<int[]> data_;
 
   void reset();
   void swap(Matrix&);

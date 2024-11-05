@@ -1,10 +1,11 @@
 #include "matrix.h"
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 
 Matrix::Matrix(const Matrix& other) :
   rows_(other.rows_), columns_(other.columns_), size_(other.size_),
-  data_(other.size_ ? new int[other.size_] : nullptr)
+  data_(other.size_ ? std::make_unique<int[]>(other.size_) : nullptr)
 {
   for (size_t i = 0; i < size_; ++i) {
     data_[i] = other.data_[i];
@@ -12,7 +13,8 @@ Matrix::Matrix(const Matrix& other) :
 }
 
 Matrix::Matrix(Matrix&& other) noexcept :
-  rows_(other.rows_), columns_(other.columns_), size_(other.size_), data_(other.data_)
+  rows_(other.rows_), columns_(other.columns_), size_(other.size_),
+  data_(std::move(other.data_))
 {
   other.reset();
 }
@@ -20,12 +22,7 @@ Matrix::Matrix(Matrix&& other) noexcept :
 Matrix::Matrix(size_t rows, size_t columns, int value) :
   rows_(rows), columns_(columns), size_(rows * columns), data_(new int[size_])
 {
-  std::fill(data_, data_ + size_, value);
-}
-
-Matrix::~Matrix() noexcept
-{
-  delete[] data_;
+  std::fill(data_.get(), data_.get() + size_, value);
 }
 
 Matrix& Matrix::operator=(const Matrix& other)
@@ -47,24 +44,24 @@ Matrix& Matrix::operator=(Matrix&& other) noexcept
 
 int* Matrix::operator[](size_t index)
 {
-  return data_ + index * columns_;
+  return data_.get() + index * columns_;
 }
 
 const int* Matrix::operator[](size_t index) const
 {
-  return data_ + index * columns_;
+  return data_.get() + index * columns_;
 }
 
 int& Matrix::at(size_t row, size_t column)
 {
   checkBounds(row, column);
-  return *(data_ + row * columns_ + column);
+  return *(data_.get() + row * columns_ + column);
 }
 
 const int& Matrix::at(size_t row, size_t column) const
 {
   checkBounds(row, column);
-  return *(data_ + row * columns_ + column);
+  return *(data_.get() + row * columns_ + column);
 }
 
 size_t Matrix::getRows() const noexcept
@@ -124,7 +121,7 @@ void Matrix::fill(int value)
 
 void Matrix::clear() noexcept
 {
-  delete[] data_;
+  data_.reset();
   reset();
 }
 
@@ -138,7 +135,7 @@ void Matrix::swap(Matrix& other)
 
 void Matrix::reset()
 {
-  data_ = nullptr;
+  data_.reset();
   rows_ = 0;
   columns_ = 0;
   size_ = 0;
