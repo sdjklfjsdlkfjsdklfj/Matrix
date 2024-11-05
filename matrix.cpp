@@ -1,28 +1,30 @@
 #include "matrix.h"
-#include <cmath>
-#include <memory>
-#include <stdexcept>
+#include <algorithm>
+
+Matrix::Matrix() : rows_(0), columns_(0), data_(std::make_unique<int[]>(0))
+{
+}
 
 Matrix::Matrix(const Matrix& other) :
-  rows_(other.rows_), columns_(other.columns_), size_(other.size_),
-  data_(other.size_ ? std::make_unique<int[]>(other.size_) : nullptr)
+  rows_(other.rows_), columns_(other.columns_),
+  data_(std::make_unique<int[]>(other.rows_ * other.columns_))
 {
-  for (size_t i = 0; i < size_; ++i) {
-    data_[i] = other.data_[i];
-  }
+  std::copy_n(other.data_.get(), other.rows_ * other.columns_, data_.get());
 }
 
 Matrix::Matrix(Matrix&& other) noexcept :
-  rows_(other.rows_), columns_(other.columns_), size_(other.size_),
-  data_(std::move(other.data_))
+  rows_(other.rows_), columns_(other.columns_), data_(std::move(other.data_))
 {
-  other.reset();
 }
 
-Matrix::Matrix(size_t rows, size_t columns, int value) :
-  rows_(rows), columns_(columns), size_(rows * columns), data_(new int[size_])
+Matrix::Matrix(size_t rows, size_t columns) :
+  rows_(rows), columns_(columns), data_(std::make_unique<int[]>(rows * columns))
 {
-  std::fill(data_.get(), data_.get() + size_, value);
+}
+
+Matrix::Matrix(size_t rows, size_t columns, int value) : Matrix(rows, columns)
+{
+  std::fill_n(data_.get(), rows * columns, value);
 }
 
 Matrix& Matrix::operator=(const Matrix& other)
@@ -54,13 +56,17 @@ const int* Matrix::operator[](size_t index) const
 
 int& Matrix::at(size_t row, size_t column)
 {
-  checkBounds(row, column);
+  if (row >= rows_ || column >= columns_) {
+    throw std::out_of_range("Row or column out of range");
+  }
   return *(data_.get() + row * columns_ + column);
 }
 
 const int& Matrix::at(size_t row, size_t column) const
 {
-  checkBounds(row, column);
+  if (row >= rows_ || column >= columns_) {
+    throw std::out_of_range("Row or column out of range");
+  }
   return *(data_.get() + row * columns_ + column);
 }
 
@@ -74,27 +80,28 @@ size_t Matrix::getColumns() const noexcept
   return columns_;
 }
 
-void Matrix::input(std::istream& is)
+std::istream& Matrix::input(std::istream& is)
 {
-  for (size_t i = 0; i < size_; ++i) {
+  for (size_t i = 0; i < rows_ * columns_; ++i) {
     is >> data_[i];
   }
+  return is;
 }
 
-void Matrix::output(std::ostream& os) const
+std::ostream& Matrix::output(std::ostream& os) const
 {
-  for (size_t i = 0; i < size_; i += columns_) {
+  for (size_t i = 0; i < rows_ * columns_; i += columns_) {
     os << data_[i];
     for (size_t j = 1; j < columns_; ++j) {
       os << ' ' << data_[i + j];
     }
     os << '\n';
   }
+  return os;
 }
 
 void Matrix::resize(size_t rows, size_t columns)
 {
-  checkSizes(rows, columns);
   if (rows == rows_ && columns == columns_) {
     return;
   }
@@ -114,44 +121,20 @@ void Matrix::resize(size_t rows, size_t columns)
 
 void Matrix::fill(int value)
 {
-  for (size_t i = 0; i < size_; ++i) {
-    data_[i] = value;
-  }
+  std::fill(data_.get(), data_.get() + rows_ * columns_, value);
 }
 
 void Matrix::clear() noexcept
 {
   data_.reset();
-  reset();
+  rows_ = 0;
+  columns_ = 0;
 }
 
 void Matrix::swap(Matrix& other)
 {
   std::swap(rows_, other.rows_);
   std::swap(columns_, other.columns_);
-  std::swap(size_, other.size_);
   std::swap(data_, other.data_);
-}
-
-void Matrix::reset()
-{
-  data_.reset();
-  rows_ = 0;
-  columns_ = 0;
-  size_ = 0;
-}
-
-void Matrix::checkBounds(size_t row, size_t column) const
-{
-  if (row >= rows_ || column >= columns_) {
-    throw std::out_of_range("Row or column out of range");
-  }
-}
-
-void Matrix::checkSizes(size_t rows, size_t columns) const
-{
-  if (rows <= 0 || columns <= 0) {
-    throw std::logic_error("Rows/columns must be greater than zero");
-  }
 }
 
