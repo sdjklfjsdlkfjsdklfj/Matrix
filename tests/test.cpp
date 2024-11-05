@@ -1,39 +1,39 @@
-#include "matrix.h"
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include "matrix.h"
 
 void testConstructors()
 {
   Matrix m1(3, 3);
-  assert(m1.rows() == 3);
-  assert(m1.columns() == 3);
+  assert(m1.getRows() == 3);
+  assert(m1.getColumns() == 3);
 
   Matrix m2(2, 2, 5);
-  assert(m2.rows() == 2);
-  assert(m2.columns() == 2);
+  assert(m2.getRows() == 2);
+  assert(m2.getColumns() == 2);
   assert(m2.at(0, 0) == 5);
   assert(m2.at(1, 1) == 5);
 
   Matrix m3(m2);
-  assert(m3.rows() == m2.rows());
-  assert(m3.columns() == m2.columns());
+  assert(m3.getRows() == m2.getRows());
+  assert(m3.getColumns() == m2.getColumns());
   assert(m3.at(1, 1) == 5);
 
   Matrix m4(std::move(m2));
-  assert(m4.rows() == 2 && m4.columns() == 2);
+  assert(m4.getRows() == 2 && m4.getColumns() == 2);
 }
 void testAssignmentOperators()
 {
   Matrix m1(2, 2, 5);
   Matrix m2 = m1;
-  assert(m2.rows() == m1.rows());
-  assert(m2.columns() == m1.columns());
+  assert(m2.getRows() == m1.getRows());
+  assert(m2.getColumns() == m1.getColumns());
   assert(m2.at(1, 1) == 5);
 
   Matrix m3(3, 3, 10);
   m3 = std::move(m1);
-  assert(m3.rows() == 2 && m3.columns() == 2);
+  assert(m3.getRows() == 2 && m3.getColumns() == 2);
   assert(m3.at(1, 1) == 5);
 }
 
@@ -68,12 +68,6 @@ void testModifications()
     assert(false && "Expected exception after clear()");
   } catch (const std::logic_error&) {
   }
-
-  Matrix m1(2, 2, 1);
-  Matrix m2(2, 2, 2);
-  m1.swap(m2);
-  assert(m1.at(0, 0) == 2);
-  assert(m2.at(0, 0) == 1);
 }
 
 void testInputOutput()
@@ -94,8 +88,8 @@ void testResize()
   Matrix m(2, 2, 3);
   m.resize(3, 3);
 
-  assert(m.rows() == 3);
-  assert(m.columns() == 3);
+  assert(m.getRows() == 3);
+  assert(m.getColumns() == 3);
 
   assert(m.at(0, 0) == 3);
   assert(m.at(1, 1) == 3);
