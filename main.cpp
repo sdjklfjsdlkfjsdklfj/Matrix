@@ -1,5 +1,5 @@
+#include <iostream>
 #include "matrix.h"
-#include <exception>
 
 int main()
 {
@@ -11,7 +11,7 @@ int main()
     return 1;
   }
   try {
-    Matrix matrix(rows, columns);
+    math::Matrix matrix(rows, columns);
     matrix.input(std::cin);
     if (!std::cin.good()) {
       std::cerr << "Invalid input\n";
