@@ -32,6 +32,13 @@ math::Matrix::Matrix(size_t rows, size_t columns, int value) : Matrix(rows, colu
   }
 }
 
+math::Matrix::Matrix(size_t rows, size_t columns, int* begin, int* end) : Matrix(rows, columns)
+{
+  for (size_t i = 0; begin != end; ++i, ++begin) {
+    data_[i] = *begin;
+  }
+}
+
 math::Matrix& math::Matrix::operator=(const Matrix& rhs)
 {
   if (this != &rhs) {

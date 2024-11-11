@@ -5,7 +5,7 @@
 
 namespace math {
 
-  class Matrix
+  class Matrix final
   {
   public:
     Matrix();
@@ -13,6 +13,7 @@ namespace math {
     Matrix(Matrix&&) noexcept;
     explicit Matrix(size_t, size_t);
     explicit Matrix(size_t, size_t, int value);
+    explicit Matrix(size_t, size_t, int* begin, int* end);
     ~Matrix() = default;
 
     Matrix& operator=(const Matrix&);

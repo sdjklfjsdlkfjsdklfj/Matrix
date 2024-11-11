@@ -21,6 +21,21 @@ void testParameterizedConstructor()
   for (size_t i = 0; i < m.getRows(); ++i)
     for (size_t j = 0; j < m.getColumns(); ++j)
       assert(m[i][j] == -1);
+
+  int values[] = { 1, 2, 3, 4, 5, 6 };
+  size_t rows = 2;
+  size_t columns = 3;
+
+  Matrix m2(rows, columns, values, values + sizeof(values) / sizeof(values[0]));
+
+  assert(m2.getRows() == rows);
+  assert(m2.getColumns() == columns);
+  assert(m2[0][0] == 1);
+  assert(m2[0][1] == 2);
+  assert(m2[0][2] == 3);
+  assert(m2[1][0] == 4);
+  assert(m2[1][1] == 5);
+  assert(m2[1][2] == 6);
 }
 
 void testCopyConstructorAndAssignment()
