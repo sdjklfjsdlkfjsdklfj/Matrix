@@ -12,12 +12,11 @@ int main()
   }
   try {
     math::Matrix matrix(rows, columns);
-    matrix.input(std::cin);
-    if (!std::cin.good()) {
+    if (!(std::cin >> matrix)) {
       std::cerr << "Invalid input\n";
       return 1;
     }
-    matrix.output(std::cout);
+    std::cout << matrix << '\n';
   } catch (std::exception& e) {
     std::cerr << "Error: " << e.what() << '\n';
     return 1;

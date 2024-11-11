@@ -21,14 +21,8 @@ namespace math {
     int* operator[](size_t);
     const int* operator[](size_t) const;
 
-    int& at(size_t, size_t);
-    const int& at(size_t, size_t) const;
-
     size_t getRows() const noexcept;
     size_t getColumns() const noexcept;
-
-    std::istream& input(std::istream&);
-    std::ostream& output(std::ostream&) const;
 
     void resize(size_t, size_t);
     void fill(int);
@@ -41,5 +35,8 @@ namespace math {
   };
 
 }
+
+std::istream& operator>>(std::istream&, math::Matrix&);
+std::ostream& operator<<(std::ostream&, const math::Matrix&);
 
 #endif
